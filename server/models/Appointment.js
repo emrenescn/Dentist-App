@@ -26,4 +26,4 @@ const appointmentSchema=new moongose.Schema({
         }
 
 },{timestamps:true});
-module.exports=moongose.Schema('Appointment',appointmentSchema)
+module.exports=moongose.model('Appointment',appointmentSchema)
