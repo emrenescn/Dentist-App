@@ -6,8 +6,11 @@ import AppRouter from "./AppRouter";
 function App() {
   return (
    <AuthProvider>
-    <AppRouter></AppRouter>
+    <AppRouter>
+
+    </AppRouter>
    </AuthProvider>
+   
   );
 }
 

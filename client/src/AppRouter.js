@@ -1,17 +1,15 @@
 import React from "react";
 import {BrowserRouter as Router,Routes,Route,Navigate} from "react-router-dom"
-
 //sayfa bileşenlerini buradan import edeceğiz
-
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import PatientDashboard from "./pages/PatientDashboard";
 import DoctorDashboard  from "./pages/DoctorDashboard";
 import AdminDashboard  from "./pages/AdminDashboard";
 import NotFound  from "./pages/NotFound";
-
 import { useContext } from "react";
 import { AuthContext } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const AppRouter=()=>{
     const {user}=useContext(AuthContext);
@@ -24,9 +22,9 @@ const AppRouter=()=>{
                <Route path="/register" element={!user ? <Register /> : <Navigate to="/" />} />
 
                 {/* Rol bazlı yönlendirme */}
-                <Route path="/patient/dashboard" element={user?.role==="patient" ? <PatientDashboard/>:<Navigate to="/login"/>}/>
-                <Route path="/doctor/dashboard" element={user?.role === "doctor" ? <DoctorDashboard /> : <Navigate to="/login" />}/>
-                <Route path="/admin/dashboard" element={user?.role === "admin" ? <AdminDashboard /> : <Navigate to="/login" />} />
+                <Route path="/patient/dashboard" element={<ProtectedRoute allowedRoles={["patient"]}><PatientDashboard/></ProtectedRoute>}/>
+                <Route path="/doctor/dashboard" element={<ProtectedRoute allowedRoles={["doctor"]}><DoctorDashboard/></ProtectedRoute>}/>
+                <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={["admin"]}><AdminDashboard/></ProtectedRoute>} />
 
                 {/* Anasayfa yönlendirme */}
                 <Route path="/" element={

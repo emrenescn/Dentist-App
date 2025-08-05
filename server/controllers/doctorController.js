@@ -66,3 +66,12 @@ exports.applyDoctor=async(req,res)=>{
             res.status(500).json({message:"Randevu güncellenemedi",error:error.message})
         }
     }
+    exports.getApprovedDoctors=async(req,res)=>{ //sadece admin tarafından onaylanan doktorları getirir
+            try{
+                const doctors=await Doctor.find({isApproved:true}).populate("user","name email")
+                res.status(200).json({doctors})
+            }
+            catch(error){
+                    res.status(500).json({message:"Doktorlar getirilemedi",error:error.message})
+            }
+    }
