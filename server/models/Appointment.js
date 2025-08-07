@@ -12,12 +12,12 @@ const appointmentSchema=new moongose.Schema({
             required:true
         },
         date:{
-            type:String,
+            type:String,  //YYYY-MM-DD şeklinde format
             required:true
         },
         time:{
             type:String,
-            required:true
+            required:true //zaman [11:00] formatında
         },
         status:{
             type:String,

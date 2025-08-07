@@ -4,18 +4,19 @@ exports.bookAppointment=async(req,res)=>{
        try{
             const{doctor,date,time}=req.body;
             if(!doctor || !date || !time){
-                res.status(400).json({message:"Tüm alanların doldurulması zorunludur"})
+                return res.status(400).json({message:"Tüm alanların doldurulması zorunludur"})
             }
-            const existing=await Appointment.findOne({doctor,date,time}) //randevu varmı kontrolü
+            const existing=await Appointment.findOne({doctor,date,time,status:{ $in: ["pending", "approved"]}}) //randevu varmı kontrolü
             if(existing){
-                res.status(400).json({message:"Bu saate randevu zaten alınmış"})
+               return  res.status(400).json({message:"Bu saate randevu zaten alınmış"})
             }
             //yeni randevu
             const appointment=new Appointment({
                 patient:req.user._id,
                 doctor,
                 date,
-                time
+                time,
+                status:"pending"
             })
             await appointment.save();
             res.status(201).json({message:"Randevu başarıyla oluşturuldu",appointment})
@@ -29,10 +30,10 @@ exports.bookAppointment=async(req,res)=>{
             const {appointmentId}=req.params;
             const appointment=await Appointment.findById(appointmentId);
             if(!appointment){
-                res.status(404).json({message:"Randevu bulunamadı"})
+               return res.status(404).json({message:"Randevu bulunamadı"})
             }
             if(appointment.patient.toString() !==req.user._id.toString()){
-                res.status(403).json({message:"Randevuyu silemeye yetkiniz yok"})
+               return res.status(403).json({message:"Randevuyu silemeye yetkiniz yok"})
             }
             appointment.status="cancelled";
             await appointment.save();
@@ -41,4 +42,21 @@ exports.bookAppointment=async(req,res)=>{
         catch(error){
             res.status(500).json({message:"İptal işlemi başarısız",error:error.message})
         }
+}
+exports.getMyAppointments=async(req,res)=>{
+            try{
+                const userId=req.user.id;
+            const appointments=await Appointment.find({patient:userId}).populate({
+                path:"doctor",
+                select:"specialization user",
+                populate:{
+                    path:"user",
+                    select:"name"
+                } //burada doktor kullanıcı olarak kaydlduğu için doktorla bağlantılı olan userdan adını çektik iç içe populate yaptık
+            }).sort({date:1,time:1})
+            res.status(200).json({appointments});
+            }
+            catch(error){
+                    res.status(500).json({message:"Randevular getirilemedi"})
+            }
 }

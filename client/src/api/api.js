@@ -6,5 +6,17 @@ const API=axios.create({
     baseURL:"http://localhost:5000/api",
 })
 
-// Eğer istersek burada token ekleme gibi işlemler için interceptor yazabiliriz
+
+//istekler için token eklemek için interceptor
+API.interceptors.request.use((config)=>{
+    const token=localStorage.getItem("token");
+    if(token){
+        config.headers.Authorization=`Bearer ${token}`;
+    }
+    return config;
+},(error)=>{
+        return Promise.reject(error) //hata olursa axios bunu göz ardı etmesin hata fırlatsın diye eklendi try catch eklenebilirdi
+}
+)
+
 export default API;

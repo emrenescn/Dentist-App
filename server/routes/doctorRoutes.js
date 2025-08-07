@@ -1,12 +1,13 @@
 const express=require('express')
 const router=express.Router()
 const authMiddleware=require('../middlewares/authMiddlewares')
-const {applyDoctor,getDoctorAppointments,updateAppointmentStatus,getApprovedDoctors}=require('../controllers/doctorController')
+const {applyDoctor,getDoctorAppointments,updateAppointmentStatus,getApprovedDoctors,getAvailableTimes}=require('../controllers/doctorController')
 
 router.post('/apply',authMiddleware,applyDoctor) //sadece login olanlar başvurur
 router.get('/appointments',authMiddleware,getDoctorAppointments)
 router.patch('/appointments/:appointmentId',authMiddleware,updateAppointmentStatus)
 router.get('/get-approved-doctors',getApprovedDoctors)
+router.get('/:doctorId/available-times',getAvailableTimes)
 
 
 module.exports=router;

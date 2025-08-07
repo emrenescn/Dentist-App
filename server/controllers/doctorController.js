@@ -75,3 +75,28 @@ exports.applyDoctor=async(req,res)=>{
                     res.status(500).json({message:"Doktorlar getirilemedi",error:error.message})
             }
     }
+
+    exports.getAvailableTimes=async(req,res)=>{ //randevu formunda hastanın seçceği saatleri ayarlıyoruz
+            try{
+                const{doctorId}=req.params;
+                const{date}=req.query;
+
+                const doctor=await Doctor.findById(doctorId);
+                if(!doctor){
+                    return res.status(404).json({message:"Doktor Bulunamadı"});
+                }
+                const allTimes=doctor.availableTimes; //doktorun kendi tanımlı saatleri
+
+                const appointments=await Appointment.find({
+                    doctor:doctorId,
+                    date,
+                    status:{$in:["pending","approved"]}
+                })
+                const bookedTimes=appointments.map((app)=>app.time)
+                const availableTimes=allTimes.filter((t)=>!bookedTimes.includes(t)) //booktimede olmayan saatler uygun saatlerdir
+                res.json({availableTimes})
+            }
+            catch(error){
+                    res.status(500).json({message:"Saatler alınamadı",error:error.message})
+            }
+    }
