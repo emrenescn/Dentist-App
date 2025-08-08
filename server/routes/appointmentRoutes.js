@@ -5,6 +5,6 @@ const {cancelAppointment,bookAppointment,getMyAppointments}=require("../controll
 
 
 router.post('/book',authMiddleware,bookAppointment)
-router.patch('/cancel/:appointmentId',authMiddleware,cancelAppointment)
+router.delete('/cancel/:appointmentId',authMiddleware,cancelAppointment)
 router.get('/my-appointments',authMiddleware,getMyAppointments)
 module.exports=router;

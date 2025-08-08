@@ -32,40 +32,48 @@ exports.applyDoctor=async(req,res)=>{
             }
             //randevuları getir hasta bilgileri ile birlikte sıralı asc
             const appointments=await Appointment.find({doctor:doctorProfile._id}).populate("patient","name email").sort({date:1,time:1})
-            res.status(200).json({appointments})
+            res.status(200).json(appointments)
         }
         catch(error){
             res.status(500).json({message:"Randevular Getirilemedi",error:error.message})
         }
     }
 //doktor randevuları onaylar veya reddeder
-    exports.updateAppointmentStatus=async(req,res)=>{
+   exports.approveAppointment=async(req,res)=>{
         try{
-            const {appointmentId}=req.params;
-            const {status}=req.body;
-            if(!["approved","rejected"].includes(status)){
-                return res.statusİ(400).json({message:"Mesaj geçersiz approved veya rejected olmalı"})
-            }
-            const doctorProfile=await Doctor.findOne({user:req.user._id})
-            if(!doctorProfile){
-                return res.status(404).json({message:"Doktor bulunamadı",error:error.message})
-            }
-            const appointment=await Appointment.findById(appointmentId)
-            if(!appointment){
-                return res.status(404).json({message:"Randevu bulunamadı",error:error.message})
-            }
-            //randevu bu doktora mı ait 
-            if(appointment.doctor.toString()!==doctorProfile._id.toString()){
-                return res.status(403).json({message:"Bu randevuya erişiminiz yok"})
-            }
-            appointment.status=status;
-            await appointment.save();
-            res.status(200).json({message:`Randevu ${status} olarak güncellendi`,appointment})
+              const appointment=await Appointment.findById(req.params.appointmentId);
+              if(!appointment){
+                return res.status(404).json({message:"Randevunuz yok"})
+              }
+              appointment.status="approved";
+              await appointment.save()
+              res.status(200).json({message:"Randevu onaylandı"})
         }
         catch(error){
-            res.status(500).json({message:"Randevu güncellenemedi",error:error.message})
+            res.status(500).json({message:"Onay sırasında hata oluştu",error:error.message});
         }
-    }
+}
+exports.rejectAppointment=async(req,res)=>{
+        try{
+            const appointment=await Appointment.findById(req.params.appointmentId);
+            if(!appointment){
+                return res.status(404).json({message:"Randevu bulunamadı"})
+            }
+            appointment.status="rejected";
+            appointment.save()
+            res.status(200).json({message:"Randevu reddedildi"})
+        }
+        catch(error){
+            res.status(500).json({message:"Reddetme işlemi sırasında bir hata oluştu"})
+        }
+
+
+
+
+
+
+}
+
     exports.getApprovedDoctors=async(req,res)=>{ //sadece admin tarafından onaylanan doktorları getirir
             try{
                 const doctors=await Doctor.find({isApproved:true}).populate("user","name email")

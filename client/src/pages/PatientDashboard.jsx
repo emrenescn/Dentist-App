@@ -2,10 +2,7 @@ import React,{useEffect,useState} from "react";
 import API from "../api/api";
 import { useForm } from "react-hook-form";
 import axios from "axios";
-
-
-
-
+import { toast } from "react-toastify";
 
 const PatientDashboard = () => {
       //Doktorları saklayacağımız state 
@@ -17,6 +14,9 @@ const PatientDashboard = () => {
 
     //hastanın kendi randevularını çek
     const [myAppointments,setMyAppointments]=useState([]);
+    //geçmiş ve yaklaşan randevuları listeleme
+    const [upcomingAppointments,setUpcomingAppointments]=useState([]);
+    const [pastAppointments,setPastAppointments]=useState([]);
 
       //sayfa yüklendiğinde doktorları çek
       useEffect(()=>{
@@ -61,7 +61,16 @@ useEffect(()=>{
     const fetchMyAppointments=async()=>{
       try{
         const response=await API.get("/appointment/my-appointments");
-        setMyAppointments(response.data.appointments)
+        const appointments=response.data.appointments;
+
+        const today=new Date();
+
+        //yaklaşan randevular
+        const upcoming=appointments.filter(a=>new Date(a.date)>=today)
+        //geçmiş randevular
+        const past=appointments.filter(a=>new Date(a.date)<today)
+        setUpcomingAppointments(upcoming);
+        setPastAppointments(past);
       }
       catch(error){
           console.error("Randevular alınamadı",error.message)
@@ -69,6 +78,18 @@ useEffect(()=>{
     }
       fetchMyAppointments();
 },[])
+
+const handleCancel=async(appointmentId)=>{
+      try{
+        await API.delete(`/appointment/cancel/${appointmentId}`)
+        toast.success("Randevu iptal edildi")
+        setMyAppointments(prev=>prev.filter(a=>a._id!==appointmentId)) //sildikten sonra diğer randevuları listeledik
+      }
+      catch(error){
+        toast.error("Randevu iptal edilemedi")
+        console.error("İptal Hatası",error.message)
+      }
+}
   
 
 const onSubmit=async(data)=>{
@@ -141,28 +162,41 @@ const onSubmit=async(data)=>{
             </button>
           </form>
         </div>
-        <div className="bg-white shadow-md rounded p-4">
-  <h2 className="text-xl font-semibold mb-4">Randevularım</h2>
-
-  {myAppointments.length === 0 ? (
-    <p>Hiç randevunuz bulunmamaktadır.</p>
+        <div>
+          {/* geçmiş gelecek randevular*/}
+  <h2 className="text-lg font-bold mt-4">Yaklaşan Randevular</h2>
+  {upcomingAppointments.length > 0 ? (
+    upcomingAppointments.map(appointment => (
+      <div key={appointment._id} className="p-2 border-b">
+        <p className="font-semibold">{appointment.doctor?.user?.name}</p>
+        <p>{appointment.date} - {appointment.time} - {appointment.status}</p>
+        {appointment.status === "pending" && (
+          <button 
+            onClick={() => handleCancel(appointment._id)} 
+            className="text-red-600 hover:underline"
+          >
+            İptal Et
+          </button>
+        )}
+      </div>
+    ))
   ) : (
-    <ul className="space-y-2">
-      {myAppointments.map((appointment) => (
-        <li
-          key={appointment._id}
-          className="border p-3 rounded shadow-sm flex justify-between items-center"
-        >
-          <div>
-            <p className="font-semibold">{appointment.doctor?.user?.name}</p>
-            <p className="text-sm text-gray-500">{appointment.doctor?.specialization}</p>
-            <p>{appointment.date} - {appointment.time} -{appointment.status}</p>
-          </div>
-        </li>
-      ))}
-    </ul>
+    <p>Yaklaşan randevunuz bulunmamaktadır.</p>
+  )}
+
+  <h2 className="text-lg font-bold mt-6">Geçmiş Randevular</h2>
+  {pastAppointments.length > 0 ? (
+    pastAppointments.map(appointment => (
+      <div key={appointment._id} className="p-2 border-b text-gray-500">
+        <p className="font-semibold">{appointment.doctor?.user?.name}</p>
+        <p>{appointment.date} - {appointment.time} - {appointment.status}</p>
+      </div>
+    ))
+  ) : (
+    <p>Geçmiş randevunuz bulunmamaktadır.</p>
   )}
 </div>
+
       </div>
     </div>
   );
@@ -171,5 +205,3 @@ const onSubmit=async(data)=>{
 
 export default PatientDashboard;
 
-//randevu iptali kısmında kaldık 
- 

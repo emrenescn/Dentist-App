@@ -25,24 +25,26 @@ exports.bookAppointment=async(req,res)=>{
                 res.status(500).json({message:"Randevu oluşturulamadı",error:error.message})
        }
 }
- exports.cancelAppointment=async(req,res)=>{
-        try{
-            const {appointmentId}=req.params;
-            const appointment=await Appointment.findById(appointmentId);
-            if(!appointment){
-               return res.status(404).json({message:"Randevu bulunamadı"})
-            }
-            if(appointment.patient.toString() !==req.user._id.toString()){
-               return res.status(403).json({message:"Randevuyu silemeye yetkiniz yok"})
-            }
-            appointment.status="cancelled";
-            await appointment.save();
-            res.status(200).json({message:"Randevunuz iptal edildi",appointment})
-        }
-        catch(error){
-            res.status(500).json({message:"İptal işlemi başarısız",error:error.message})
-        }
-}
+ exports.cancelAppointment = async (req, res) => {
+  try {
+    const appointmentId = req.params.appointmentId;
+    const appointment = await Appointment.findById(appointmentId);
+    if (!appointment) {
+      return res.status(404).json({ message: "Randevu bulunamadı" });
+    }
+
+    // Eğer randevu onaylanmamışsa sil
+    if (appointment.status !== "approved") {
+      await Appointment.findByIdAndDelete(appointmentId);
+      return res.status(200).json({ message: "Randevu iptal edildi" });
+    } else {
+      return res.status(400).json({ message: "Onaylanmış randevu iptal edilemez" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "İptal sırasında hata oluştu", error: error.message });
+  }
+};
+
 exports.getMyAppointments=async(req,res)=>{
             try{
                 const userId=req.user.id;
