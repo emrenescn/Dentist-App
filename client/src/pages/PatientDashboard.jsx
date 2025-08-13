@@ -1,8 +1,8 @@
 import React,{useEffect,useState} from "react";
 import API from "../api/api";
 import { useForm } from "react-hook-form";
-import axios from "axios";
 import { toast } from "react-toastify";
+import { Link } from "react-router-dom";
 
 const PatientDashboard = () => {
       //Doktorları saklayacağımız state 
@@ -17,6 +17,11 @@ const PatientDashboard = () => {
     //geçmiş ve yaklaşan randevuları listeleme
     const [upcomingAppointments,setUpcomingAppointments]=useState([]);
     const [pastAppointments,setPastAppointments]=useState([]);
+
+    //tek bir başvuryu çekmek için başvuru butonu kısmını gösterip göstermme ile ilgili kısım
+                const [loading,setLoading]=useState(true);
+                const [applicationExists,setApplicationExists]=useState(false);
+                const [status,setStatus]=useState("");
 
       //sayfa yüklendiğinde doktorları çek
       useEffect(()=>{
@@ -104,11 +109,47 @@ const onSubmit=async(data)=>{
        }
       }
 
+ useEffect(() => {
+    const fetchApplicationStatus = async () => {
+      try {
+        const res = await API.get("/doctor-application/my-application");
+        if (res.data.exists) {
+          setApplicationExists(true);
+          setStatus(res.data.status);
+        } else {
+          setApplicationExists(false);
+        }
+      } catch (error) {
+        console.error("Başvuru alınamadı", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchApplicationStatus();
+  }, []);
+  if (loading) {
+    return <p>Yükleniyor...</p>;
+  }
+
        return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-blue-700 mb-6">Hasta Paneli</h1>
-
+        {/* Doktor Başvurusu Alanı */}
+      <div className="mt-4 p-3 border rounded bg-gray-100">
+        {!applicationExists ? (
+          <Link
+            to="/doctor-application/apply"
+            className="text-blue-600 font-semibold underline"
+          >
+            Doktor Başvurusu Yap
+          </Link>
+        ) : (
+          <p>
+            <strong>Başvuru Durumunuz:</strong> {status}
+          </p>
+        )}
+      </div>
         <div className="bg-white shadow-md rounded p-4 mb-6">
           <h2 className="text-xl font-semibold mb-4">Yeni Randevu Al</h2>
 
@@ -204,4 +245,6 @@ const onSubmit=async(data)=>{
 };
 
 export default PatientDashboard;
+
+
 

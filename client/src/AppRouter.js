@@ -10,6 +10,9 @@ import NotFound  from "./pages/NotFound";
 import { useContext } from "react";
 import { AuthContext } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import DoctorProfile from "./pages/DoctorProfile";
+import DoctorApplicationForm from "./pages/DoctorApplicationForm";
+
 
 const AppRouter=()=>{
     const {user}=useContext(AuthContext);
@@ -25,6 +28,8 @@ const AppRouter=()=>{
                 <Route path="/patient/dashboard" element={<ProtectedRoute allowedRoles={["patient"]}><PatientDashboard/></ProtectedRoute>}/>
                 <Route path="/doctor/dashboard" element={<ProtectedRoute allowedRoles={["doctor"]}><DoctorDashboard/></ProtectedRoute>}/>
                 <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={["admin"]}><AdminDashboard/></ProtectedRoute>} />
+                <Route path="/doctor/profile" element={<ProtectedRoute allowedRoles={["doctor"]}><DoctorProfile/></ProtectedRoute>} />
+                <Route path="/doctor-application/apply" element={<ProtectedRoute allowedRoles={["patient"]}><DoctorApplicationForm/></ProtectedRoute>}/>
 
                 {/* Anasayfa yönlendirme */}
                 <Route path="/" element={

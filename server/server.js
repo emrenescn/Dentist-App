@@ -5,8 +5,9 @@ const cors=require("cors")
 const connectDB = require("./config/DB.JS")
 const authRoutes=require("./routes/authRoutes")
 const doctorRoutes=require("./routes/doctorRoutes")
-const adminRoutes=require("./routes/adminRoutes")
+//const adminRoutes=require("./routes/adminRoutes")
 const appointmentRoutes=require("./routes/appointmentRoutes")
+const doctorApplicationRoutes=require("./routes/doctorApplicationRoutes")
 require("dotenv").config()
 connectDB();//mongo bağlantısını çağırdık 
 
@@ -19,8 +20,9 @@ app.use(express.json())
 
 app.use("/api/auth",authRoutes);
 app.use("/api/doctor",doctorRoutes)
-app.use("/api/admin",adminRoutes)
+//app.use("/api/admin",adminRoutes)
 app.use("/api/appointment",appointmentRoutes)
+app.use("/api/doctor-application",doctorApplicationRoutes)
 //test endpoint
 app.get('/',(req,res)=>{
     res.send("Diş hekimi sistemi API çalışıyor")

@@ -1,11 +1,14 @@
-import React,{useEffect,useState} from "react";
+import React,{ useEffect,useState} from "react";
 import API from "../api/api"
 import { toast } from "react-toastify";
+import {Link} from "react-router-dom"
+
 
 
 const DoctorDashboard = () => {
         //doktorun randevularını getir
         const [appointments,setAppointments]=useState([]);
+       
         useEffect(()=>{
               const fetchAppointments=async()=>{
               try{
@@ -51,8 +54,15 @@ const DoctorDashboard = () => {
 
 
 
+
+
+
         return (
     <div className="p-6">
+      <nav className="mb-4">
+        <Link to="/doctor-application/apply" className="mr-4">Başvuru</Link>
+        <Link to="/doctor/profile">Profilim</Link> {/* Buraya profil linkini ekledik */}
+      </nav>
       <h1 className="text-2xl font-bold mb-4">Randevularım</h1>
       {appointments.length === 0 ? (
         <p>Henüz randevu yok</p>
@@ -109,4 +119,3 @@ const DoctorDashboard = () => {
 
 export default DoctorDashboard;
 
-//DOKTOR RANDEVU LİSTELEME ONAYLAMA SİLME BİTTİ 
